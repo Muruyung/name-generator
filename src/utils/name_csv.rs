@@ -93,11 +93,18 @@ pub fn dataset_name(year: u32, gender: String) ->  Result<NameCSV, csv::Error> {
     for record in reader.deserialize() {
         arr_result.push(record?)
     }
-
+    
     arr_result = arr_result.
         into_iter().
-        filter(|y| y.year_min <= year).
-        filter(|g| g.sex == gender).collect();
+        filter(
+            |y| 
+            (
+                (y.year_min <= year && y.year_min > year - 50) ||
+                (y.year_max <= year && y.year_max > year - 50) ||
+                (y.year_pop <= year && y.year_pop > year - 50) 
+            ) &&
+            (y.sex == gender || !y.unisex.is_none())
+        ).collect();
 
     let mut rng = rand::thread_rng();
     let generator: usize = rng.gen_range(0..arr_result.len());
